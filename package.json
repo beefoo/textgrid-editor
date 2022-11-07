@@ -1,0 +1,16 @@
+{
+  "name": "textgrid-editor",
+  "description": "Simple web UI for editing Praat TextGrid files",
+  "scripts": {
+    "lint": "./node_modules/.bin/eslint",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "eslint": "^8.25.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.26.0"
+  }
+}
