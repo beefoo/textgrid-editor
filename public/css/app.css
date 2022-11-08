@@ -41,19 +41,28 @@ li {
   padding: 4px;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   background: #ddd;
 }
 .nav-item {
-  margin-right: 4px;
+  padding-right: 4px;
 }
 .options-nav button {
   white-space: nowrap;
+  margin-right: 4px;
 }
 .filename {
   white-space: nowrap;
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   overflow: hidden;
   text-overflow: ellipsis;
+  position: absolute;
+  display: block;
+  top: 0;
+  left: 0;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 2px;
+  font-style: italic;
 }
 .main {
   flex-grow: 1;
@@ -65,10 +74,12 @@ li {
 
 .audio-container {
   flex-grow: 1;
+  position: relative;
 }
 .phones-container {
   flex-grow: 1;
   background: #333;
+  position: relative;
 }
 .transcript-container {
   height: 60px;

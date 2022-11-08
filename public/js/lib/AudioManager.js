@@ -1,16 +1,14 @@
 class AudioManager {
   constructor(options = {}) {
-    const defaults = {
-      padSegments: 0.25,
-      skipLength: 5,
-    };
+    const defaults = {};
     this.options = _.extend({}, defaults, options);
     this.init();
   }
 
   init() {
     this.isLoading = false;
-    this.$filename = $('.filename');
+    this.isLoaded = false;
+    this.$filename = $('.audio-filename');
   }
 
   static formatSeconds(seconds) {
@@ -47,10 +45,13 @@ class AudioManager {
   }
 
   onSoundLoad(file) {
+    this.isLoading = false;
+    this.isLoaded = true;
+
     const seconds = this.audioBuffer.duration;
     const formattedTime = this.constructor.formatSeconds(seconds);
     this.duration = seconds;
-    this.$filename.text('');
+    this.$filename.text(file.name);
     console.log(`Loaded ${file.name} with duration ${formattedTime}`);
   }
 }

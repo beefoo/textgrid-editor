@@ -20,21 +20,19 @@
     <nav class="nav options-nav">
       <div class="nav-item">
         <label for="fileinput" class="visually-hidden">Open file(s)</label>
-        <input id="fileinput" type="file" name="fileinput" class="fileinput" accept="audio/*,video/*,text/*,.TextGrid" multiple />
+        <input id="fileinput" type="file" name="fileinput" class="fileinput" accept=".wav,.TextGrid" multiple />
       </div>
       <div class="nav-item">
         <button class="download-textgrid">Download TextGrid</button>
       </div>
-      <div class="nav-item">
-        <button class="download-edits">Download edits</button>
-      </div>
-      <div class="nav-item">
-        <div class="filename"></div>
-      </div>
     </nav>
     <main class="main">
-      <div class="audio-container"></div>
-      <div class="phones-container"></div>
+      <div class="audio-container">
+        <div class="audio-filename filename">Select a .wav file above</div>
+      </div>
+      <div class="phones-container">
+        <div class="textgrid-filename filename">Select a .TextGrid file above</div>
+      </div>
       <div class="transcript-container"></div>
     </main>
   </div>
