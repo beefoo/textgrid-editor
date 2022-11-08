@@ -10,6 +10,7 @@
         "ecmaVersion": 12
     },
     "rules": {
+      "no-alert": "off",
       "no-console": "off",
       "no-undef": "off",
       "no-unused-vars": "off"
