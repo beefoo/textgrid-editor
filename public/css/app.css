@@ -60,9 +60,10 @@ li {
   display: block;
   top: 0;
   left: 0;
-  background: rgba(255, 255, 255, 0.2);
-  padding: 2px;
+  background: #555;
+  padding: 2px 4px;
   font-style: italic;
+  z-index: 100;
 }
 .main {
   flex-grow: 1;
@@ -93,6 +94,10 @@ li {
 }
 .words .word.visible {
   display: block;
+  opacity: 0.75;
+}
+.words .word.active {
+  opacity: 1;
 }
 .words .word .phones {
   position: absolute;
@@ -125,6 +130,10 @@ li {
 .transcript .word {
   margin: 8px 8px 0 0;
   display: inline-block;
+}
+.transcript .word.selected {
+  background: #333;
+  color: white;
 }
 
 .visually-hidden {

@@ -13,6 +13,10 @@ class TextGridManager {
     this.$transcript = $('#transcript');
   }
 
+  loadListeners() {
+    this.$transcript.on('click', '.select-word', (e) => this.selectWord(e));
+  }
+
   loadTextGridFromFile(file) {
     if (this.isLoading) return;
     this.isLoading = true;
@@ -32,7 +36,7 @@ class TextGridManager {
     let html = '';
     data.forEach((word, i) => {
       const text = word.text !== '' ? word.text : '_';
-      html += `<button class="word" data-index="${i}">${text}</button>`;
+      html += `<button class="word select-word" data-word="${i}">${text}</button>`;
     });
     this.$transcript.html(html);
 
@@ -56,6 +60,8 @@ class TextGridManager {
   }
 
   loadWord(index) {
+    $('.select-word').removeClass('selected');
+    $(`.select-word[data-word="${index}"]`).addClass('selected');
     const wordCount = this.data.length;
     const wordMargin = 1;
     let minIndex = index - wordMargin;
@@ -94,6 +100,7 @@ class TextGridManager {
     // console.log(this.data);
     this.$filename.text(file.name);
     this.loadUI();
+    this.loadListeners();
     this.loadWord(0);
   }
 
@@ -125,5 +132,11 @@ class TextGridManager {
       return word;
     });
     return words;
+  }
+
+  selectWord(event) {
+    const $button = $(event.currentTarget);
+    const index = parseInt($button.attr('data-word'), 10);
+    this.loadWord(index);
   }
 }
