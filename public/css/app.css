@@ -82,34 +82,61 @@ li {
   background: #333;
   position: relative;
 }
-.words .word {
+.words .word-wrapper {
   position: absolute;
   height: 100%;
   display: none;
 }
-.word-text {
+.words .word-wrapper.visible {
+  display: block;
+  opacity: 0.75;
+}
+.words .word-wrapper.active {
+  opacity: 1;
+}
+.words .word {
+  position: absolute;
   width: 100%;
   height: 50%;
   text-align: center;
 }
-.words .word.visible {
-  display: block;
-  opacity: 0.75;
+.word .word-text {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
 }
-.words .word.active {
-  opacity: 1;
-}
-.words .word .phones {
+.words .phones {
   position: absolute;
   width: 100%;
   height: 50%;
   bottom: 0;
 }
-.phones .phone-text {
+.phones .phone {
   position: absolute;
   height: 100%;
   top: 0;
   text-align: center;
+  display: block;
+}
+.phone .phone-text {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+}
+.phone .phone-start {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  z-index: 100;
+  display: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+.words .word-wrapper.active .phone .phone-start {
   display: block;
 }
 .transcript-container {
