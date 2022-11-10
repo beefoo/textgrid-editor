@@ -2,6 +2,8 @@ class TextGridManager {
   constructor(options = {}) {
     const defaults = {
       minPhoneDuration: 0.01,
+      onClickSegment: (segment) => console.log(segment),
+      onLoadWord: (textgrid) => console.log(textgrid),
       secondStep: 0.01,
       wordMargin: 1,
     };
@@ -16,6 +18,18 @@ class TextGridManager {
     this.$words = $('#words');
     this.$transcript = $('#transcript');
     this.duration = 0;
+    this.currentWordIndex = -1;
+  }
+
+  getCurrentRange() {
+    const segment = {};
+    if (this.currentWordIndex < 0) return segment;
+
+    const words = this.getVisibleWords(this.currentWordIndex);
+    segment.start = words[0].start;
+    segment.end = words[2].end;
+
+    return segment;
   }
 
   getVisibleWords(index) {
@@ -37,6 +51,7 @@ class TextGridManager {
   loadListeners() {
     this.$transcript.on('click', '.select-word', (e) => this.selectWord(e));
     this.$words.on('input', '.phone-start', (e) => this.updatePhoneStart(e));
+    this.$words.on('click', '.segement', (e) => this.onClickSegment(e));
   }
 
   loadTextGridFromFile(file) {
@@ -70,7 +85,7 @@ class TextGridManager {
       const { start, dur } = word;
       html += `<div class="word-wrapper" data-word="${i}">`;
       html += ' <div class="word">';
-      html += `  <button class="word-text" data-word="${i}">${word.text}</button>`;
+      html += `  <button class="word-text segement" data-word="${i}">${word.text}</button>`;
       html += ' </div>';
       html += ' <div class="phones">';
       word.phones.forEach((phone, j) => {
@@ -78,7 +93,7 @@ class TextGridManager {
         const left = ((phone.start - start) / dur) * 100;
         const style = `style="width: ${width}%; left: ${left}%"`;
         html += ` <div class="phone" data-word="${i}" data-phone="${j}" ${style}>`;
-        html += `  <button class="phone-text" data-word="${i}" data-phone="${j}">${phone.text}</button>`;
+        html += `  <button class="phone-text segement" data-word="${i}" data-phone="${j}">${phone.text}</button>`;
         html += `  <label for="p${i}-${j}" class="visually-hidden">Audio start value for ${phone.text}</label>`;
         html += `  <input id="p${i}-${j}" type="number" value="${phone.start}" step="${secondStep}" class="phone-start" data-word="${i}" data-phone="${j}" />`;
         html += ' </div>';
@@ -90,6 +105,7 @@ class TextGridManager {
   }
 
   loadWord(index) {
+    if (index === this.currentWordIndex) return;
     $('.select-word').removeClass('selected');
     $(`.select-word[data-word="${index}"]`).addClass('selected');
     $('.word-wrapper').removeClass('visible active');
@@ -107,6 +123,25 @@ class TextGridManager {
       $word.addClass('visible');
       if (i === 1) $word.addClass('active');
     });
+    this.currentWordIndex = index;
+    this.options.onLoadWord(this);
+  }
+
+  onClickSegment(e) {
+    const $el = $(e.currentTarget);
+    let segment = {};
+    if ($el.is('[data-word]')) {
+      const i = parseInt($el.attr('data-word'), 10);
+      if ($el.is('[data-phone]')) {
+        const j = parseInt($el.attr('data-phone'), 10);
+        segment = this.data[i].phones[j];
+      } else {
+        segment = this.data[i];
+      }
+    } else {
+      segment = this.getCurrentRange();
+    }
+    this.options.onClickSegment(segment);
   }
 
   onTextGridLoad(file, data) {

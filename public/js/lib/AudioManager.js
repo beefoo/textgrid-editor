@@ -1,6 +1,9 @@
 class AudioManager {
   constructor(options = {}) {
-    const defaults = {};
+    const defaults = {
+      fadeIn: 0.025,
+      fadeOut: 0.025,
+    };
     this.options = _.extend({}, defaults, options);
     this.init();
   }
@@ -8,7 +11,10 @@ class AudioManager {
   init() {
     this.isLoading = false;
     this.isLoaded = false;
+    this.isRangeSet = false;
     this.$filename = $('.audio-filename');
+    this.loadUI();
+    this.loadListeners();
   }
 
   static formatSeconds(seconds) {
@@ -18,11 +24,15 @@ class AudioManager {
     return date.toISOString().substring(14, 19);
   }
 
+  loadListeners() {
+    const delayedResize = _.debounce((e) => this.onResize(), 250);
+    $(window).on('resize', delayedResize);
+  }
+
   loadSoundFromFile(file) {
     if (this.isLoading) return;
     const { $filename } = this;
     this.audioContext = new AudioContext();
-    this.audioContext.suspend();
     this.isLoading = true;
     const reader = new FileReader();
     reader.addEventListener('progress', (event) => {
@@ -44,6 +54,22 @@ class AudioManager {
     reader.readAsArrayBuffer(file);
   }
 
+  loadUI() {
+    this.$canvas = $('#waveform');
+    this.canvas = this.$canvas[0];
+    this.onResize();
+  }
+
+  onResize() {
+    const w = this.$canvas.width();
+    const h = this.$canvas.height();
+    this.canvas.width = w;
+    this.canvas.height = h;
+    this.canvasCtx = this.canvas.getContext('2d');
+    this.canvasCtx.fillStyle = 'white';
+    this.render();
+  }
+
   onSoundLoad(file) {
     this.isLoading = false;
     this.isLoaded = true;
@@ -52,6 +78,73 @@ class AudioManager {
     const formattedTime = this.constructor.formatSeconds(seconds);
     this.duration = seconds;
     this.$filename.text(file.name);
-    console.log(`Loaded ${file.name} with duration ${formattedTime}`);
+    this.render();
+    // console.log(`Loaded ${file.name} with duration ${formattedTime}`);
+  }
+
+  playSegment(start, end) {
+    if (!this.isLoaded) return;
+
+    const { fadeIn, fadeOut } = this.options;
+    const ctx = this.audioContext;
+    const dur = end - start + fadeIn + fadeOut;
+    const offsetStart = Math.max(0, start - fadeIn);
+    const audioSource = ctx.createBufferSource();
+    const gainNode = ctx.createGain();
+    const now = ctx.currentTime;
+
+    // set audio buffer
+    audioSource.buffer = this.audioBuffer;
+
+    // fade in
+    gainNode.gain.setValueAtTime(Number.EPSILON, now);
+    gainNode.gain.exponentialRampToValueAtTime(1, now + fadeIn);
+    // fade out
+    gainNode.gain.setValueAtTime(1, now + dur - fadeOut);
+    gainNode.gain.exponentialRampToValueAtTime(Number.EPSILON, now + dur);
+
+    // connect and play
+    audioSource.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    audioSource.start(0, offsetStart, dur);
+  }
+
+  render() {
+    if (!this.isLoaded || !this.isRangeSet) return;
+    const ctx = this.canvasCtx;
+    const { width, height } = this.canvas;
+    const { rangeStart, rangeEnd } = this;
+    const data = this.audioBuffer.getChannelData(0);
+    const { sampleRate } = this.audioBuffer;
+    const sampleStart = Math.round(rangeStart * sampleRate);
+    const sampleEnd = Math.floor(rangeEnd * sampleRate);
+    const segment = data.slice(sampleStart, sampleEnd);
+    const samples = segment.length;
+
+    // https://github.com/meandavejustice/draw-wave/blob/master/index.js
+    ctx.clearRect(0, 0, width, height);
+    const step = Math.ceil(samples / width);
+    const amp = height / 2;
+    for (let i = 0; i < width; i += 1) {
+      let min = 1.0;
+      let max = -1.0;
+      for (let j = 0; j < step; j += 1) {
+        const datum = segment[(i * step) + j];
+        if (datum < min) min = datum;
+        if (datum > max) max = datum;
+      }
+      const x = i;
+      const y = (1 + min) * amp;
+      const w = 1;
+      const h = Math.max(1, (max - min) * amp);
+      ctx.fillRect(x, y, w, h);
+    }
+  }
+
+  setRange(start, end) {
+    this.isRangeSet = true;
+    this.rangeStart = start;
+    this.rangeEnd = end;
+    this.render();
   }
 }

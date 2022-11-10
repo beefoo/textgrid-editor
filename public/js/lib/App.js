@@ -7,12 +7,19 @@ class App {
 
   init() {
     this.audioManager = new AudioManager();
-    this.textgridManager = new TextGridManager();
+    this.textgridManager = new TextGridManager({
+      onClickSegment: (segment) => this.onClickSegment(segment),
+      onLoadWord: (textgrid) => this.onLoadWord(textgrid),
+    });
     this.loadListeners();
   }
 
   loadListeners() {
     $('#fileinput').off().on('change', (e) => this.onFileInput(e));
+  }
+
+  onClickSegment(segment) {
+    this.audioManager.playSegment(segment.start, segment.end);
   }
 
   onFileInput(event) {
@@ -34,5 +41,10 @@ class App {
       return (foundMedia && foundTextGrid);
     });
     return foundBoth;
+  }
+
+  onLoadWord(textgrid) {
+    const range = textgrid.getCurrentRange();
+    this.audioManager.setRange(range.start, range.end);
   }
 }
