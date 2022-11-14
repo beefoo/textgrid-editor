@@ -11,10 +11,13 @@ class AudioManager {
   init() {
     this.isLoading = false;
     this.isLoaded = false;
+    this.isPlaying = false;
     this.isRangeSet = false;
+    this.currentAudioSource = false;
     this.$filename = $('.audio-filename');
     this.loadUI();
     this.loadListeners();
+    this.update();
   }
 
   static formatSeconds(seconds) {
@@ -64,7 +67,7 @@ class AudioManager {
   }
 
   onMouseMove(e) {
-    if (!this.isLoaded || !this.isRangeSet) return;
+    if (!this.isLoaded || !this.isRangeSet || this.isPlaying) return;
     const t = e.clientX / this.windowWidth;
     this.setMarker(t);
   }
@@ -95,6 +98,8 @@ class AudioManager {
   playSegment(start, end) {
     if (!this.isLoaded) return;
 
+    if (this.isPlaying) this.stopCurrentAudioSource();
+
     const { fadeIn, fadeOut } = this.options;
     const ctx = this.audioContext;
     const dur = end - start + fadeIn + fadeOut;
@@ -117,6 +122,16 @@ class AudioManager {
     audioSource.connect(gainNode);
     gainNode.connect(ctx.destination);
     audioSource.start(0, offsetStart, dur);
+    this.isPlaying = true;
+    this.playStart = offsetStart;
+    this.playEnd = offsetStart + dur;
+    this.playWhenStart = now;
+    this.playWhenEnd = now + dur;
+    audioSource.onended = (e) => {
+      this.currentAudioSource = false;
+      this.isPlaying = false;
+    };
+    this.currentAudioSource = audioSource;
   }
 
   render() {
@@ -172,5 +187,34 @@ class AudioManager {
       width: `${width}%`,
       left: `${left}%`,
     });
+  }
+
+  stopCurrentAudioSource() {
+    if (!this.currentAudioSource) return;
+
+    this.currentAudioSource.onended = null;
+    this.currentAudioSource.stop();
+    this.currentAudioSource.disconnect(this.audioContext.destination);
+    this.currentAudioSource = false;
+    this.isPlaying = false;
+  }
+
+  update() {
+    window.requestAnimationFrame(() => this.update());
+
+    if (!this.isLoaded || !this.isPlaying || !this.isRangeSet) return;
+
+    const ctx = this.audioContext;
+    const now = ctx.currentTime;
+    const {
+      playStart, playEnd, playWhenStart, playWhenEnd,
+    } = this;
+    if (now < playWhenStart || now > playWhenEnd) return;
+
+    const playProgress = MathUtil.norm(now, playWhenStart, playWhenEnd);
+    const currentAudioTime = MathUtil.lerp(playStart, playEnd, playProgress);
+    const t = MathUtil.clamp(MathUtil.norm(currentAudioTime, this.rangeStart, this.rangeEnd));
+
+    this.setMarker(t);
   }
 }
