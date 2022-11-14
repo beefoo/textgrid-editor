@@ -8,6 +8,7 @@ class App {
   init() {
     this.audioManager = new AudioManager();
     this.textgridManager = new TextGridManager({
+      onChangeWord: (word) => this.onChangeWord(word),
       onClickSegment: (segment) => this.onClickSegment(segment),
       onLoadWord: (textgrid) => this.onLoadWord(textgrid),
     });
@@ -16,6 +17,10 @@ class App {
 
   loadListeners() {
     $('#fileinput').off().on('change', (e) => this.onFileInput(e));
+  }
+
+  onChangeWord(word) {
+    this.audioManager.setWindow(word.start, word.end);
   }
 
   onClickSegment(segment) {

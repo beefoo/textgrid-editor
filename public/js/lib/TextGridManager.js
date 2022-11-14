@@ -2,6 +2,7 @@ class TextGridManager {
   constructor(options = {}) {
     const defaults = {
       minPhoneDuration: 0.01,
+      onChangeWord: (word) => console.log(word),
       onClickSegment: (segment) => console.log(segment),
       onLoadWord: (textgrid) => console.log(textgrid),
       secondStep: 0.01,
@@ -125,6 +126,7 @@ class TextGridManager {
     });
     this.currentWordIndex = index;
     this.options.onLoadWord(this);
+    this.options.onChangeWord(visibleWords[1]);
   }
 
   onClickSegment(e) {
@@ -231,6 +233,7 @@ class TextGridManager {
     } else {
       this.data[i].start = newStart;
       this.data[i].dur = word.end - newStart;
+      this.options.onChangeWord(this.data[i]);
       if (i > 0) {
         const prevWordPhoneIndex = this.data[i - 1].phones.length - 1;
         this.data[i - 1].phones[prevWordPhoneIndex].end = newStart;

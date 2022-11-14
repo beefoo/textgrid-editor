@@ -57,6 +57,7 @@ class AudioManager {
   loadUI() {
     this.$canvas = $('#waveform');
     this.canvas = this.$canvas[0];
+    this.$window = $('#audio-window');
     this.onResize();
   }
 
@@ -146,5 +147,17 @@ class AudioManager {
     this.rangeStart = start;
     this.rangeEnd = end;
     this.render();
+  }
+
+  setWindow(start, end) {
+    if (!this.isRangeSet) return;
+    const { rangeStart, rangeEnd } = this;
+    const range = rangeEnd - rangeStart;
+    const width = ((end - start) / range) * 100;
+    const left = ((start - rangeStart) / range) * 100;
+    this.$window.css({
+      width: `${width}%`,
+      left: `${left}%`,
+    });
   }
 }
