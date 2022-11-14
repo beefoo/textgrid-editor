@@ -99,6 +99,17 @@ li {
   border-top: 0;
   border-bottom: 0;
 }
+.audio-marker {
+  width: 1px;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: rgba(0, 255, 55, 0.6);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
 
 .phones-container {
   flex-grow: 1;

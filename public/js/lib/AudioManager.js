@@ -27,6 +27,7 @@ class AudioManager {
   loadListeners() {
     const delayedResize = _.debounce((e) => this.onResize(), 250);
     $(window).on('resize', delayedResize);
+    $('.main').on('mousemove', (e) => this.onMouseMove(e));
   }
 
   loadSoundFromFile(file) {
@@ -58,10 +59,18 @@ class AudioManager {
     this.$canvas = $('#waveform');
     this.canvas = this.$canvas[0];
     this.$window = $('#audio-window');
+    this.$marker = $('#audio-marker');
     this.onResize();
   }
 
+  onMouseMove(e) {
+    if (!this.isLoaded || !this.isRangeSet) return;
+    const t = e.clientX / this.windowWidth;
+    this.setMarker(t);
+  }
+
   onResize() {
+    this.windowWidth = $(window).width();
     const w = this.$canvas.width();
     const h = this.$canvas.height();
     this.canvas.width = w;
@@ -140,6 +149,10 @@ class AudioManager {
       const h = Math.max(1, (max - min) * amp);
       ctx.fillRect(x, y, w, h);
     }
+  }
+
+  setMarker(percent) {
+    this.$marker.css('left', `${percent * 100}%`);
   }
 
   setRange(start, end) {
