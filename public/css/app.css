@@ -49,9 +49,11 @@ li {
 .nav-item {
   padding-right: 4px;
 }
-.options-nav button {
+.options-nav button,
+.options-nav .button {
   white-space: nowrap;
   margin-right: 4px;
+  display: block;
 }
 .filename {
   white-space: nowrap;

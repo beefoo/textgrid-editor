@@ -18,8 +18,50 @@ class TextGridManager {
     this.$filename = $('.textgrid-filename');
     this.$words = $('#words');
     this.$transcript = $('#transcript');
+    this.$downloadButton = $('.download-textgrid');
+    this.$downloadLink = $('#download-link');
     this.duration = 0;
     this.currentWordIndex = -1;
+  }
+
+  download() {
+    if (!this.isLoaded) return;
+    // console.log(this.rawData);
+
+    const d = this.rawData;
+    let t = '';
+    t += `File type = "${d.File_type}"\n`;
+    t += `Object class = "${d.Object_class}"\n`;
+    t += '\n';
+    t += `xmin = ${d.xmin} \n`;
+    t += `xmax = ${d.xmax} \n`;
+    t += 'tiers? <exists> \n';
+    t += `size = ${d.size} \n`;
+
+    t += 'item []: \n';
+    d.items.forEach((item, i) => {
+      t += `\titem [${i + 1}]:\n`;
+      t += `\t\tclass = "${item.class}" \n`;
+      t += `\t\tname = "${item.name}" \n`;
+      t += `\t\txmin = ${item.xmin} \n`;
+      t += `\t\txmax = ${item.xmax} \n`;
+      t += `\t\tintervals: size = ${item.intervals_size} \n`;
+      let datum = this.data;
+      if (item.name === 'phones') {
+        datum = _.pluck(datum, 'phones');
+        datum = _.flatten(datum, 1);
+      }
+      datum.forEach((dd, j) => {
+        t += `\t\tintervals [${j + 1}]:\n`;
+        t += `\t\t\txmin = ${dd.start} \n`;
+        t += `\t\t\txmax = ${dd.end} \n`;
+        t += `\t\t\ttext = "${dd.text}" \n`;
+      });
+    });
+
+    const uri = `data:application/txt,${encodeURIComponent(t)}`;
+    this.$downloadLink.attr('href', uri);
+    this.$downloadLink[0].click();
   }
 
   getCurrentRange() {
@@ -52,7 +94,10 @@ class TextGridManager {
   loadListeners() {
     this.$transcript.on('click', '.select-word', (e) => this.selectWord(e));
     this.$words.on('input', '.phone-start', (e) => this.updatePhoneStart(e));
-    this.$words.on('click', '.segement', (e) => this.onClickSegment(e));
+    this.$words.on('click', '.segment', (e) => this.onClickSegment(e));
+    this.$downloadButton.on('click', (e) => {
+      this.download();
+    });
   }
 
   loadTextGridFromFile(file) {
@@ -86,7 +131,7 @@ class TextGridManager {
       const { start, dur } = word;
       html += `<div class="word-wrapper" data-word="${i}">`;
       html += ' <div class="word">';
-      html += `  <button class="word-text segement" data-word="${i}">${word.text}</button>`;
+      html += `  <button class="word-text segment" data-word="${i}">${word.text}</button>`;
       html += ' </div>';
       html += ' <div class="phones">';
       word.phones.forEach((phone, j) => {
@@ -94,7 +139,7 @@ class TextGridManager {
         const left = ((phone.start - start) / dur) * 100;
         const style = `style="width: ${width}%; left: ${left}%"`;
         html += ` <div class="phone" data-word="${i}" data-phone="${j}" ${style}>`;
-        html += `  <button class="phone-text segement" data-word="${i}" data-phone="${j}">${phone.text}</button>`;
+        html += `  <button class="phone-text segment" data-word="${i}" data-phone="${j}">${phone.text}</button>`;
         html += `  <label for="p${i}-${j}" class="visually-hidden">Audio start value for ${phone.text}</label>`;
         html += `  <input id="p${i}-${j}" type="number" value="${phone.start}" step="${secondStep}" class="phone-start" data-word="${i}" data-phone="${j}" />`;
         html += ' </div>';
@@ -155,6 +200,7 @@ class TextGridManager {
     this.isLoaded = true;
     // console.log(this.data);
     this.$filename.text(file.name);
+    this.$downloadLink.attr('download', file.name);
     this.loadUI();
     this.loadListeners();
     this.loadWord(1);
