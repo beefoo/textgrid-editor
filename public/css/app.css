@@ -49,6 +49,9 @@ li {
 .nav-item {
   padding-right: 4px;
 }
+.nav-item.fill {
+  flex-grow: 1;
+}
 .options-nav button,
 .options-nav .button {
   white-space: nowrap;

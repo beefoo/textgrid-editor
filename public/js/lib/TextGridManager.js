@@ -24,6 +24,36 @@ class TextGridManager {
     this.currentWordIndex = -1;
   }
 
+  deleteCurrentWord() {
+    if (this.currentWordIndex < 0) return;
+
+    const i = this.currentWordIndex;
+    let newCurrentIndex = i;
+    const wordCount = this.data.length;
+    const word = this.data[i];
+    if (i < wordCount - 1) {
+      this.data[i + 1].start = word.start;
+      this.data[i + 1].dur += word.dur;
+      this.data[i + 1].phones[0].start = word.start;
+      this.data[i + 1].phones[0].dur += word.dur;
+    } else {
+      newCurrentIndex = i - 1;
+      this.data[i - 1].end = word.end;
+      this.data[i - 1].dur += word.dur;
+      const phoneCount = this.data[i - 1].phones.length;
+      this.data[i - 1].phones[phoneCount - 1].end = word.end;
+      this.data[i - 1].phones[phoneCount - 1].dur += word.dur;
+    }
+    this.data = this.data.filter((w, index) => index !== i);
+    this.data = this.data.map((w, index) => {
+      const newWord = _.clone(w);
+      newWord.index = index;
+      return newWord;
+    });
+    this.loadUI();
+    this.loadWord(newCurrentIndex);
+  }
+
   download() {
     if (!this.isLoaded) return;
     // console.log(this.rawData);
@@ -49,12 +79,12 @@ class TextGridManager {
       t += `${sp2}name = "${item.name}" ${eol}`;
       t += `${sp2}xmin = ${item.xmin} ${eol}`;
       t += `${sp2}xmax = ${item.xmax} ${eol}`;
-      t += `${sp2}intervals: size = ${item.intervals_size} ${eol}`;
       let datum = this.data;
       if (item.name === 'phones') {
         datum = _.pluck(datum, 'phones');
         datum = _.flatten(datum, 1);
       }
+      t += `${sp2}intervals: size = ${datum.length} ${eol}`;
       datum.forEach((dd, j) => {
         t += `${sp2}intervals [${j + 1}]:${eol}`;
         t += `${sp3}xmin = ${dd.start} ${eol}`;
@@ -102,6 +132,7 @@ class TextGridManager {
     this.$downloadButton.on('click', (e) => {
       this.download();
     });
+    $('.delete-current').on('click', (e) => this.deleteCurrentWord());
   }
 
   loadTextGridFromFile(file) {
@@ -155,7 +186,7 @@ class TextGridManager {
   }
 
   loadWord(index) {
-    if (index === this.currentWordIndex) return;
+    // if (index === this.currentWordIndex) return;
     $('.select-word').removeClass('selected');
     $(`.select-word[data-word="${index}"]`).addClass('selected');
     $('.word-wrapper').removeClass('visible active');

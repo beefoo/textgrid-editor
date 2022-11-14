@@ -194,7 +194,7 @@ class AudioManager {
 
     this.currentAudioSource.onended = null;
     this.currentAudioSource.stop();
-    this.currentAudioSource.disconnect(this.audioContext.destination);
+    // this.currentAudioSource.disconnect(this.audioContext.destination);
     this.currentAudioSource = false;
     this.isPlaying = false;
   }
