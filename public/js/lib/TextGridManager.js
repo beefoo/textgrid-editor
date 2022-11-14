@@ -125,6 +125,50 @@ class TextGridManager {
     return this.data.filter((word, i) => i >= minIndex && i <= maxIndex);
   }
 
+  insertSilence() {
+    if (this.currentWordIndex < 0) return;
+
+    const i = this.currentWordIndex;
+    const word = this.data[i];
+    const phoneCount = word.phones.length;
+    const lastPhone = word.phones[phoneCount - 1];
+
+    if (lastPhone.dur <= this.options.minPhoneDuration) {
+      alert(`Last phone must be greater than ${this.options.minPhoneDuration} to insert silence`);
+      return;
+    }
+
+    const newPhoneDur = MathUtil.roundToNearest(lastPhone.dur * 0.5, this.options.secondStep);
+    const silenceDur = lastPhone.dur - newPhoneDur;
+    const newPhoneEnd = lastPhone.start + newPhoneDur;
+    this.data[i].end = newPhoneEnd;
+    this.data[i].dur -= silenceDur;
+    this.data[i].phones[phoneCount - 1].end = newPhoneEnd;
+    this.data[i].phones[phoneCount - 1].dur -= silenceDur;
+
+    const silenceIndex = i + 1;
+    this.data.splice(silenceIndex, 0, {
+      start: newPhoneEnd,
+      end: newPhoneEnd + silenceDur,
+      dur: silenceDur,
+      text: '',
+      phones: [{
+        start: newPhoneEnd,
+        end: newPhoneEnd + silenceDur,
+        dur: silenceDur,
+        text: '',
+      }],
+    });
+
+    this.data = this.data.map((w, index) => {
+      const newWord = _.clone(w);
+      newWord.index = index;
+      return newWord;
+    });
+    this.loadUI();
+    this.loadWord(i);
+  }
+
   loadListeners() {
     this.$transcript.on('click', '.select-word', (e) => this.selectWord(e));
     this.$words.on('input', '.phone-start', (e) => this.updatePhoneStart(e));
@@ -133,6 +177,7 @@ class TextGridManager {
       this.download();
     });
     $('.delete-current').on('click', (e) => this.deleteCurrentWord());
+    $('.insert-silence').on('click', (e) => this.insertSilence());
   }
 
   loadTextGridFromFile(file) {
