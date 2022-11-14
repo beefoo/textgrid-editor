@@ -29,33 +29,37 @@ class TextGridManager {
     // console.log(this.rawData);
 
     const d = this.rawData;
+    const eol = '\r\n';
+    const sp = '    ';
+    const sp2 = `${sp}${sp}`;
+    const sp3 = `${sp}${sp}${sp}`;
     let t = '';
-    t += `File type = "${d.File_type}"\n`;
-    t += `Object class = "${d.Object_class}"\n`;
-    t += '\n';
-    t += `xmin = ${d.xmin} \n`;
-    t += `xmax = ${d.xmax} \n`;
-    t += 'tiers? <exists> \n';
-    t += `size = ${d.size} \n`;
+    t += `File type = "${d.File_type}"${eol}`;
+    t += `Object class = "${d.Object_class}"${eol}`;
+    t += eol;
+    t += `xmin = ${d.xmin} ${eol}`;
+    t += `xmax = ${d.xmax} ${eol}`;
+    t += `tiers? <exists> ${eol}`;
+    t += `size = ${d.size} ${eol}`;
 
     t += 'item []: \n';
     d.items.forEach((item, i) => {
-      t += `\titem [${i + 1}]:\n`;
-      t += `\t\tclass = "${item.class}" \n`;
-      t += `\t\tname = "${item.name}" \n`;
-      t += `\t\txmin = ${item.xmin} \n`;
-      t += `\t\txmax = ${item.xmax} \n`;
-      t += `\t\tintervals: size = ${item.intervals_size} \n`;
+      t += `${sp}item [${i + 1}]:${eol}`;
+      t += `${sp2}class = "${item.class}" ${eol}`;
+      t += `${sp2}name = "${item.name}" ${eol}`;
+      t += `${sp2}xmin = ${item.xmin} ${eol}`;
+      t += `${sp2}xmax = ${item.xmax} ${eol}`;
+      t += `${sp2}intervals: size = ${item.intervals_size} ${eol}`;
       let datum = this.data;
       if (item.name === 'phones') {
         datum = _.pluck(datum, 'phones');
         datum = _.flatten(datum, 1);
       }
       datum.forEach((dd, j) => {
-        t += `\t\tintervals [${j + 1}]:\n`;
-        t += `\t\t\txmin = ${dd.start} \n`;
-        t += `\t\t\txmax = ${dd.end} \n`;
-        t += `\t\t\ttext = "${dd.text}" \n`;
+        t += `${sp2}intervals [${j + 1}]:${eol}`;
+        t += `${sp3}xmin = ${dd.start} ${eol}`;
+        t += `${sp3}xmax = ${dd.end} ${eol}`;
+        t += `${sp3}text = "${dd.text}" ${eol}`;
       });
     });
 
