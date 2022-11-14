@@ -159,7 +159,8 @@ li {
   width: 100%;
   box-sizing: border-box;
 }
-.words .word-wrapper.active .phone .phone-start {
+.words .word-wrapper.active .phone .phone-start,
+.words .word-wrapper.active + .word-wrapper .phone:first-child .phone-start {
   display: block;
 }
 .transcript-container {

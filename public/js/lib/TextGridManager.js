@@ -233,7 +233,6 @@ class TextGridManager {
     } else {
       this.data[i].start = newStart;
       this.data[i].dur = word.end - newStart;
-      this.options.onChangeWord(this.data[i]);
       if (i > 0) {
         const prevWordPhoneIndex = this.data[i - 1].phones.length - 1;
         this.data[i - 1].phones[prevWordPhoneIndex].end = newStart;
@@ -244,11 +243,10 @@ class TextGridManager {
     }
 
     // update UI
-    const visibleWords = this.getVisibleWords(i);
+    const visibleWords = this.getVisibleWords(this.currentWordIndex);
     const totalDur = visibleWords.reduce((prev, w) => prev + w.dur, 0);
     const phraseStart = visibleWords[0].start;
     visibleWords.forEach((w, wi) => {
-      if (wi >= 2) return;
       const $word = $(`.word-wrapper[data-word="${w.index}"]`).first();
       const width = ((w.dur) / totalDur) * 100;
       const left = ((w.start - phraseStart) / totalDur) * 100;
@@ -266,5 +264,7 @@ class TextGridManager {
         });
       });
     });
+
+    this.options.onChangeWord(visibleWords[1]);
   }
 }
