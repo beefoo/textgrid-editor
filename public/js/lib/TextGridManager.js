@@ -264,6 +264,7 @@ class TextGridManager {
         segment = this.data[i].phones[j];
       } else {
         segment = this.data[i];
+        this.loadWord(i);
       }
     } else {
       segment = this.getCurrentRange();
